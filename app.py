@@ -4,7 +4,7 @@ import joblib
 
 # Load the trained Gradient Boosting model and preprocessor pipeline
 model = joblib.load("gradient_boosting_model.pkl")
-preprocessor = joblib.load("preprocessor.pkl")
+preprocessor = joblib.load("preprocessor.pkl")  # Includes preprocessing and feature selection
 
 # Streamlit App Title and Description
 st.title("Bank Marketing Campaign Prediction")
