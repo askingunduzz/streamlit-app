@@ -2,75 +2,78 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the model and preprocessor
-model = joblib.load('gradient_boosting_model.pkl')
-preprocessor = joblib.load('preprocessor.pkl')
-feature_selector = joblib.load('feature_selector.pkl')  # Save and load SelectKBest pipeline separately
+# Load the trained Gradient Boosting model and preprocessor pipeline
+model = joblib.load("gradient_boosting_model.pkl")
+preprocessor = joblib.load("preprocessor.pkl")
 
-st.title("Bank Marketing Prediction App")
-st.write("This app predicts whether a customer will subscribe to a term deposit.")
+# Streamlit App Title and Description
+st.title("Bank Marketing Campaign Prediction")
+st.write("""
+This app predicts whether a customer will subscribe to a term deposit.
+Provide customer details below to make a prediction.
+""")
 
-# Create input fields for user inputs
-st.sidebar.header("User Input Parameters")
+# Sidebar for User Input
+st.sidebar.header("Enter Customer Details")
 
-def user_input_features():
-    age = st.sidebar.number_input('Age', min_value=18, max_value=100, value=30)
-    job = st.sidebar.selectbox('Job', ['admin.', 'technician', 'services', 'management', 'retired', 'blue-collar', 'unemployed', 'housemaid', 'entrepreneur', 'student', 'self-employed', 'unknown'])
-    marital = st.sidebar.selectbox('Marital Status', ['married', 'single', 'divorced'])
-    education = st.sidebar.selectbox('Education', ['university.degree', 'high.school', 'basic.9y', 'basic.4y', 'basic.6y', 'professional.course', 'unknown'])
-    default = st.sidebar.selectbox('Default Credit?', ['yes', 'no'])
-    housing = st.sidebar.selectbox('Housing Loan?', ['yes', 'no'])
-    loan = st.sidebar.selectbox('Personal Loan?', ['yes', 'no'])
-    contact = st.sidebar.selectbox('Contact Communication Type', ['cellular', 'telephone'])
-    month = st.sidebar.selectbox('Month of Last Contact', ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
-    day_of_week = st.sidebar.selectbox('Day of Week', ['mon', 'tue', 'wed', 'thu', 'fri'])
-    campaign = st.sidebar.number_input('Number of Contacts', min_value=1, value=1)
-    
-    # Create DataFrame from inputs
+# Input fields for user data
+def get_user_input():
+    age = st.sidebar.number_input("Age", min_value=18, max_value=100, step=1)
+    job = st.sidebar.selectbox("Job", ["admin.", "blue-collar", "entrepreneur", "housemaid",
+                                       "management", "retired", "self-employed", "services",
+                                       "student", "technician", "unemployed", "unknown"])
+    marital = st.sidebar.selectbox("Marital Status", ["married", "single", "divorced", "unknown"])
+    education = st.sidebar.selectbox("Education", ["primary", "secondary", "tertiary", "unknown"])
+    default = st.sidebar.selectbox("Default Credit?", ["yes", "no"])
+    housing = st.sidebar.selectbox("Housing Loan?", ["yes", "no"])
+    loan = st.sidebar.selectbox("Personal Loan?", ["yes", "no"])
+    duration = st.sidebar.number_input("Last Contact Duration (seconds)", min_value=0, step=1)
+    campaign = st.sidebar.number_input("Number of Contacts in Campaign", min_value=1, step=1)
+
+    # Add placeholder values for missing features
     data = {
-        'age': age, 
-        'job': job, 
-        'marital': marital, 
-        'education': education,
-        'default': default, 
-        'housing': housing, 
-        'loan': loan, 
-        'contact': contact, 
-        'month': month, 
-        'day_of_week': day_of_week,
-        'campaign': campaign
+        'age': [age],
+        'job': [job],
+        'marital': [marital],
+        'education': [education],
+        'default': [default],
+        'housing': [housing],
+        'loan': [loan],
+        'duration': [duration],
+        'campaign': [campaign],
+        # Add default values for missing columns
+        'cons.price.idx': [93.0],
+        'day_of_week': ['mon'],
+        'cons.conf.idx': [-40.0],
+        'contact': ['cellular'],
+        'poutcome': ['failure'],
+        'pdays': [0],
+        'euribor3m': [4.5],
+        'month': ['may'],
+        'previous': [0],
+        'emp.var.rate': [1.1],
+        'nr.employed': [5191.0]
     }
-    features = pd.DataFrame([data])
-    return features
+    return pd.DataFrame(data)
 
-input_df = user_input_features()
+# Get user input
+input_data = get_user_input()
 
-st.subheader("User Input Features")
-st.write(input_df)
+# Display user input
+st.subheader("Customer Input Data:")
+st.write(input_data)
 
-# Ensure input_df has all expected columns
-missing_cols = set(preprocessor.feature_names_in_) - set(input_df.columns)
-for col in missing_cols:
-    if col in preprocessor.transformers_[0][2]:  # Numerical columns
-        input_df[col] = 0  # Default for missing numerical features
-    else:  # Categorical columns
-        input_df[col] = "unknown"  # Default for missing categorical features
+# Preprocess input data to match training pipeline
+input_processed = preprocessor.transform(input_data)
 
-# Align input_df to match training data columns
-input_df = input_df[preprocessor.feature_names_in_]
+# Predict button
+if st.button("Predict"):
+    prediction = model.predict(input_processed)
+    if prediction[0] == "yes":
+        st.success("The customer is likely to subscribe to the term deposit.")
+    else:
+        st.error("The customer is unlikely to subscribe to the term deposit.")
 
-# Preprocess inputs
-processed_input = preprocessor.transform(input_df)
-
-# Apply feature selection
-processed_input_selected = feature_selector.transform(processed_input)
-
-# Make predictions
-prediction = model.predict(processed_input_selected)
-prediction_proba = model.predict_proba(processed_input_selected)
-
-st.subheader("Prediction")
-st.write("Yes" if prediction[0] == 1 else "No")
-
-st.subheader("Prediction Probability")
-st.write(prediction_proba)
+# Footer
+st.write("---")
+st.write("*Deployed using Streamlit*")
