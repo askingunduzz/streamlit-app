@@ -5,6 +5,7 @@ import joblib
 # Load the model and preprocessor
 model = joblib.load('gradient_boosting_model.pkl')
 preprocessor = joblib.load('preprocessor.pkl')
+feature_selector = joblib.load('feature_selector.pkl')  # Save and load SelectKBest pipeline separately
 
 st.title("Bank Marketing Prediction App")
 st.write("This app predicts whether a customer will subscribe to a term deposit.")
@@ -58,15 +59,18 @@ for col in missing_cols:
 # Align input_df to match training data columns
 input_df = input_df[preprocessor.feature_names_in_]
 
-# Preprocess inputs and make predictions
+# Preprocess inputs
 processed_input = preprocessor.transform(input_df)
-prediction = model.predict(processed_input)
-prediction_proba = model.predict_proba(processed_input)
+
+# Apply feature selection
+processed_input_selected = feature_selector.transform(processed_input)
+
+# Make predictions
+prediction = model.predict(processed_input_selected)
+prediction_proba = model.predict_proba(processed_input_selected)
 
 st.subheader("Prediction")
 st.write("Yes" if prediction[0] == 1 else "No")
 
 st.subheader("Prediction Probability")
 st.write(prediction_proba)
-
-# Deploy and test again
