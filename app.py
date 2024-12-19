@@ -27,9 +27,16 @@ def user_input_features():
     
     # Create DataFrame from inputs
     data = {
-        'age': age, 'job': job, 'marital': marital, 'education': education,
-        'default': default, 'housing': housing, 'loan': loan, 
-        'contact': contact, 'month': month, 'day_of_week': day_of_week,
+        'age': age, 
+        'job': job, 
+        'marital': marital, 
+        'education': education,
+        'default': default, 
+        'housing': housing, 
+        'loan': loan, 
+        'contact': contact, 
+        'month': month, 
+        'day_of_week': day_of_week,
         'campaign': campaign
     }
     features = pd.DataFrame([data])
@@ -39,6 +46,17 @@ input_df = user_input_features()
 
 st.subheader("User Input Features")
 st.write(input_df)
+
+# Ensure input_df has all expected columns
+missing_cols = set(preprocessor.feature_names_in_) - set(input_df.columns)
+for col in missing_cols:
+    if col in preprocessor.transformers_[0][2]:  # Numerical columns
+        input_df[col] = 0  # Default for missing numerical features
+    else:  # Categorical columns
+        input_df[col] = "unknown"  # Default for missing categorical features
+
+# Align input_df to match training data columns
+input_df = input_df[preprocessor.feature_names_in_]
 
 # Preprocess inputs and make predictions
 processed_input = preprocessor.transform(input_df)
@@ -50,3 +68,5 @@ st.write("Yes" if prediction[0] == 1 else "No")
 
 st.subheader("Prediction Probability")
 st.write(prediction_proba)
+
+# Deploy and test again
