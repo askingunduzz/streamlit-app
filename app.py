@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
-import joblib
 import os
+import joblib
 
-# Constructing dynamic paths to the .pkl files
+# Dynamically find the paths of the .pkl files
 model_path = os.path.join(os.path.dirname(__file__), "gradient_boosting_model.pkl")
 preprocessor_path = os.path.join(os.path.dirname(__file__), "preprocessor.pkl")
+
+# Load the model and preprocessor
+model = joblib.load(model_path)
+preprocessor = joblib.load(preprocessor_path)
 
 # Loading the model and preprocessor
 model = joblib.load(model_path)
