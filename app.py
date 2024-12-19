@@ -1,10 +1,16 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
 
-# Load the trained Gradient Boosting model and preprocessor pipeline
-model = joblib.load("gradient_boosting_model.pkl")
-preprocessor = joblib.load("preprocessor.pkl")
+# Constructing dynamic paths to the .pkl files
+model_path = os.path.join(os.path.dirname(__file__), "gradient_boosting_model.pkl")
+preprocessor_path = os.path.join(os.path.dirname(__file__), "preprocessor.pkl")
+
+# Loading the model and preprocessor
+model = joblib.load(model_path)
+preprocessor = joblib.load(preprocessor_path)
+
 
 # Streamlit App Title and Description
 st.title("Bank Marketing Campaign Prediction")
