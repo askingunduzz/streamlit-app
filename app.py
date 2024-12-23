@@ -41,6 +41,18 @@ def get_user_input():
         'loan': [loan],
         'duration': [duration],
         'campaign': [campaign],
+        # Add default values for missing columns
+        'cons.price.idx': [93.0],
+        'day_of_week': ['mon'],
+        'cons.conf.idx': [-40.0],
+        'contact': ['cellular'],
+        'poutcome': ['failure'],
+        'pdays': [0],
+        'euribor3m': [4.5],
+        'month': ['may'],
+        'previous': [0],
+        'emp.var.rate': [1.1],
+        'nr.employed': [5191.0]
     }
     return pd.DataFrame(data)
 
