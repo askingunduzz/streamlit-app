@@ -39,7 +39,6 @@ def get_user_input():
         'default': [default],
         'housing': [housing],
         'loan': [loan],
-        'duration': [duration],
         'campaign': [campaign],
         # Add default values for missing columns
         'cons.price.idx': [93.0],
@@ -52,6 +51,7 @@ def get_user_input():
         'month': ['may'],
         'previous': [0],
         'emp.var.rate': [1.1],
+        'duration': [999],
         'nr.employed': [5191.0]
     }
     return pd.DataFrame(data)
